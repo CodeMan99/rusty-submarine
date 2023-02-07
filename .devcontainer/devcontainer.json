@@ -1,0 +1,24 @@
+{
+	"name": "Rust",
+	"image": "debian:bullseye-slim",
+	// "customizations": {
+	// 	"vscode": {
+	// 		"settings": { 
+	// 			"terminal.integrated.defaultProfile.linux": "bash"
+	// 		},
+	// 		"extensions": [
+	// 			"mads-hartmann.bash-ide-vscode",
+	// 			"rogalmic.bash-debug"
+	// 		]
+	// 	}
+	// },
+	"remoteUser": "rustacean",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"username": "rustacean"
+		},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/rust:1": {}
+	}
+}
