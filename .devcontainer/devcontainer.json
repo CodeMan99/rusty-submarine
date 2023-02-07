@@ -3,15 +3,16 @@
 	"image": "debian:bullseye-slim",
 	// "customizations": {
 	// 	"vscode": {
-	// 		"settings": { 
-	// 			"terminal.integrated.defaultProfile.linux": "bash"
-	// 		},
-	// 		"extensions": [
-	// 			"mads-hartmann.bash-ide-vscode",
-	// 			"rogalmic.bash-debug"
-	// 		]
+	// 		"settings": {
+	// 			"rust-analyzer.server.extraEnv": {
+	// 				"RUSTUP_TOOLCHAIN": "nightly"
+	// 			}
+	// 		}
 	// 	}
 	// },
+	"containerEnv": {
+		"RUSTUP_TOOLCHAIN": "nightly"
+	},
 	"remoteUser": "rustacean",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
@@ -19,6 +20,8 @@
 		},
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/rust:1": {}
+		"ghcr.io/devcontainers/features/rust:1": {
+			"profile": "default"
+		}
 	}
 }
