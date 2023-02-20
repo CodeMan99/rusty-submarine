@@ -30,9 +30,10 @@ impl<'r> FromRequest<'r> for ApiKey {
 }
 
 #[post("/typical-create")]
-fn typical_create(key: ApiKey) -> String {
+fn typical_create(key: ApiKey) -> rocket::response::status::Accepted<rocket::response::content::RawJson<String>> {
     println!("      >> Request Accepted with Api-Key: {:?}", key);
-    format!("Some value {}\r\n", Uuid::new_v4())
+    let id = Uuid::new_v4();
+    rocket::response::status::Accepted(Some(rocket::response::content::RawJson(format!("{{\"id\":\"{}\"}}", id))))
 }
 
 #[get("/delay/<seconds>")]
