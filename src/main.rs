@@ -6,15 +6,24 @@ mod apikey;
 
 use apikey::ApiKey;
 use rocket::tokio::time::{sleep, Duration};
-use rocket::response::content::RawJson;
 use rocket::response::status::Accepted;
+use rocket::serde::Serialize;
+use rocket::serde::json::Json;
 use uuid::Uuid;
 
+#[derive(Serialize)]
+struct Document {
+    id: String,
+}
+
 #[post("/typical-create")]
-fn typical_create(key: ApiKey) -> Accepted<RawJson<String>> {
+fn typical_create(key: ApiKey) -> Accepted<Json<Document>> {
     println!("      >> Request Accepted with Api-Key: {:?}", key);
     let id = Uuid::new_v4();
-    Accepted(Some(RawJson(format!("{{\"id\":\"{}\"}}", id))))
+    let doc = Document {
+        id: id.to_string()
+    };
+    Accepted(Some(Json(doc)))
 }
 
 #[get("/delay/<seconds>")]
