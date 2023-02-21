@@ -2,38 +2,19 @@
 #[macro_use]
 extern crate rocket;
 
+mod apikey;
+
+use apikey::ApiKey;
 use rocket::tokio::time::{sleep, Duration};
+use rocket::response::content::RawJson;
+use rocket::response::status::Accepted;
 use uuid::Uuid;
-use rocket::http::Status;
-use rocket::request::{Outcome, Request, FromRequest};
-
-#[derive(Debug, Clone, Copy)]
-struct ApiKey(Uuid);
-
-#[derive(Debug)]
-enum ApiKeyError {
-    Missing,
-    Invalid(&'static str),
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for ApiKey {
-    type Error = ApiKeyError;
-
-    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match req.headers().get_one("x-api-key").map(Uuid::parse_str) {
-            None => Outcome::Failure((Status::BadRequest, ApiKeyError::Missing)),
-            Some(Ok(key)) => Outcome::Success(ApiKey(key)),
-            Some(Err(_err)) => Outcome::Failure((Status::BadRequest, ApiKeyError::Invalid("Unable to parse API-KEY")))
-        }
-    }
-}
 
 #[post("/typical-create")]
-fn typical_create(key: ApiKey) -> rocket::response::status::Accepted<rocket::response::content::RawJson<String>> {
+fn typical_create(key: ApiKey) -> Accepted<RawJson<String>> {
     println!("      >> Request Accepted with Api-Key: {:?}", key);
     let id = Uuid::new_v4();
-    rocket::response::status::Accepted(Some(rocket::response::content::RawJson(format!("{{\"id\":\"{}\"}}", id))))
+    Accepted(Some(RawJson(format!("{{\"id\":\"{}\"}}", id))))
 }
 
 #[get("/delay/<seconds>")]
