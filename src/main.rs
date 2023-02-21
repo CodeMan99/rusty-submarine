@@ -13,16 +13,14 @@ use uuid::Uuid;
 
 #[derive(Serialize)]
 struct Document {
-    id: String,
+    id: Uuid,
 }
 
 #[post("/typical-create")]
 fn typical_create(key: ApiKey) -> Accepted<Json<Document>> {
     println!("      >> Request Accepted with Api-Key: {:?}", key);
     let id = Uuid::new_v4();
-    let doc = Document {
-        id: id.to_string()
-    };
+    let doc = Document { id };
     Accepted(Some(Json(doc)))
 }
 
