@@ -13,6 +13,7 @@
 	"containerEnv": {
 		"RUSTUP_TOOLCHAIN": "nightly"
 	},
+	"postCreateCommand": "sudo chmod 0775 /usr/local/sccache && sudo chgrp rustlang /usr/local/sccache",
 	"remoteUser": "rustacean",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
@@ -22,6 +23,7 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/rust:1": {
 			"profile": "default"
-		}
+		},
+		"./rustacean/features/sccache": {}
 	}
 }
