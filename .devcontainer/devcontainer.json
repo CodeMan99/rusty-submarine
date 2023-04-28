@@ -26,6 +26,9 @@
 		}
 	},
 	"postCreateCommand": "sudo chmod 0775 /usr/local/sccache && sudo chgrp rustlang /usr/local/sccache",
+	"remoteEnv": {
+		"DATABASE_URL": "postgres://postgres:postgres@pgrusty:5432/rusty"
+	},
 	"remoteUser": "rustacean",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
