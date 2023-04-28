@@ -1,17 +1,29 @@
 {
 	"name": "Rust",
-	"image": "debian:bullseye-slim",
-	// "customizations": {
-	// 	"vscode": {
-	// 		"settings": {
-	// 			"rust-analyzer.server.extraEnv": {
-	// 				"RUSTUP_TOOLCHAIN": "nightly"
-	// 			}
-	// 		}
-	// 	}
-	// },
-	"containerEnv": {
-		"RUSTUP_TOOLCHAIN": "nightly"
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mtxr.sqltools-driver-pg",
+				"mtxr.sqltools"
+			],
+			"settings": {
+				// "rust-analyzer.server.extraEnv": {
+				// 	"RUSTUP_TOOLCHAIN": "nightly"
+				// },
+				"sqltools.autoConnectTo": "pgrusty",
+				"sqltools.connections": [
+					{
+						"connectString": "postgresql://postgres:postgres@pgrusty:5432/rusty",
+						"driver": "PostgreSQL",
+						"name": "pgrusty",
+						"server": "pgrusty"
+					}
+				]
+			}
+		}
 	},
 	"postCreateCommand": "sudo chmod 0775 /usr/local/sccache && sudo chgrp rustlang /usr/local/sccache",
 	"remoteUser": "rustacean",
