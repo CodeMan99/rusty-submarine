@@ -1,0 +1,7 @@
+{
+  "id": "sqlx-cli",
+  "name": "Install sqlx-cli via cargo",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/rust"
+  ]
+}

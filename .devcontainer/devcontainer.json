@@ -39,6 +39,7 @@
 		"ghcr.io/devcontainers/features/rust:1": {
 			"profile": "default"
 		},
-		"./rustacean/features/sccache": {}
+		"./rustacean/features/sccache": {},
+		"./rustacean/features/sqlx-cli": {}
 	}
 }
