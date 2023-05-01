@@ -1,51 +1,31 @@
-#![feature(decl_macro)]
-#[macro_use]
-extern crate rocket;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::postgres::Postgres;
+use sqlx::pool::Pool;
 
-mod apikey;
-
-use apikey::ApiKey;
-use rocket::tokio::time::{sleep, Duration};
-use rocket::response::status::Accepted;
-use rocket::serde::Serialize;
-use rocket::serde::json::Json;
-use uuid::Uuid;
-
-#[derive(Serialize)]
-struct Document {
-    id: Uuid,
+#[derive(Debug)]
+struct User {
+    id: i64,
+    username: String,
+    first: Option<String>,
+    last: Option<String>,
+    age: Option<i32>,
 }
 
-#[post("/typical-create")]
-fn typical_create(key: ApiKey) -> Accepted<Json<Document>> {
-    println!("      >> Request Accepted with Api-Key: {:?}", key);
-    let id = Uuid::new_v4();
-    let doc = Document { id };
-    Accepted(Some(Json(doc)))
+#[tokio::main]
+async fn main() -> Result<(), sqlx::Error> {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://postgres:postgres@pgrusty:5432/rusty").await?;
+
+    let users = list_users(pool).await?;
+
+    dbg!(users);
+
+    Ok(())
 }
 
-#[get("/delay/<seconds>")]
-async fn delay(seconds: u64) -> String {
-    sleep(Duration::from_secs(seconds)).await;
-    format!("Waited for {} seconds\r\n", seconds)
-}
-
-#[get("/")]
-fn index() -> &'static str {
-    "Hello Cody\r\n"
-}
-
-#[get("/goodbye")]
-fn goodbye() -> &'static str {
-    "Goodbye Cody\r\n"
-}
-
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![
-        index,
-        goodbye,
-        delay,
-        typical_create,
-    ])
+async fn list_users(pool: Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
+    sqlx::query_as!(User, "SELECT id, username, first, last, age FROM public.user;")
+        .fetch_all(&pool)
+        .await
 }
