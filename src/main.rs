@@ -1,6 +1,6 @@
 use sqlx::pool::Pool;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::postgres::Postgres;
+use sqlx::postgres::{PgPoolOptions, Postgres};
+use std::env;
 
 #[derive(Debug)]
 struct User {
@@ -13,9 +13,10 @@ struct User {
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
+    let database_url = env::var("DATABASE_URL").expect("Must set DATABASE_URL.");
     let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgres://postgres:postgres@pgrusty:5432/rusty")
+        .connect(&database_url)
         .await?;
 
     let user = User {
@@ -32,6 +33,10 @@ async fn main() -> Result<(), sqlx::Error> {
     let users = list_users(&pool).await?;
 
     dbg!(users);
+
+    let count = delete_user(&pool, id).await?;
+
+    dbg!(count);
 
     Ok(())
 }
@@ -57,4 +62,15 @@ async fn create_user(pool: &Pool<Postgres>, user: User) -> Result<i64, sqlx::Err
     .await?;
 
     Ok(record.id)
+}
+
+async fn delete_user(pool: &Pool<Postgres>, id: i64) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query!(
+        "DELETE FROM public.user WHERE id = $1;",
+        id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(result.rows_affected())
 }
