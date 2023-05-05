@@ -1,5 +1,4 @@
-use sqlx::pool::Pool;
-use sqlx::postgres::{PgPoolOptions, Postgres};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::env;
 
 #[derive(Debug)]
@@ -34,14 +33,25 @@ async fn main() -> Result<(), sqlx::Error> {
 
     dbg!(users);
 
-    let count = delete_user(&pool, id).await?;
+    if let Some(tris) = find_user(&pool, String::from("tris")).await? {
+        dbg!(&tris);
 
-    dbg!(count);
+        let age = tris.age.unwrap_or(10);
+        let update_count = set_user_age(&pool, tris.id, age - 1).await?;
+
+        dbg!(update_count);
+    } else {
+        eprintln!("User 'tris' was not found");
+    }
+
+    let delete_count = delete_user(&pool, id).await?;
+
+    dbg!(delete_count);
 
     Ok(())
 }
 
-async fn list_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
+async fn list_users(pool: &PgPool) -> Result<Vec<User>, sqlx::Error> {
     sqlx::query_as!(
         User,
         "SELECT id, username, first, last, age FROM public.user;"
@@ -50,7 +60,7 @@ async fn list_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
     .await
 }
 
-async fn create_user(pool: &Pool<Postgres>, user: User) -> Result<i64, sqlx::Error> {
+async fn create_user(pool: &PgPool, user: User) -> Result<i64, sqlx::Error> {
     let record = sqlx::query!(
         "INSERT INTO public.user(username, first, last, age) VALUES ($1, $2, $3, $4) RETURNING id;",
         user.username,
@@ -64,13 +74,28 @@ async fn create_user(pool: &Pool<Postgres>, user: User) -> Result<i64, sqlx::Err
     Ok(record.id)
 }
 
-async fn delete_user(pool: &Pool<Postgres>, id: i64) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!(
-        "DELETE FROM public.user WHERE id = $1;",
-        id
+async fn find_user(pool: &PgPool, username: String) -> Result<Option<User>, sqlx::Error> {
+    sqlx::query_as!(
+        User,
+        "SELECT id, username, first, last, age FROM public.user WHERE username = $1 LIMIT 1;",
+        username
     )
-    .execute(pool)
-    .await?;
+    .fetch_optional(pool)
+    .await
+}
+
+async fn set_user_age(pool: &PgPool, id: i64, age: i32) -> Result<u64, sqlx::Error> {
+    let record = sqlx::query!("UPDATE public.user SET age = $1 WHERE id = $2;", age, id)
+        .execute(pool)
+        .await?;
+
+    Ok(record.rows_affected())
+}
+
+async fn delete_user(pool: &PgPool, id: i64) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query!("DELETE FROM public.user WHERE id = $1;", id)
+        .execute(pool)
+        .await?;
 
     Ok(result.rows_affected())
 }
