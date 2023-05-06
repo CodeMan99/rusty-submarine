@@ -1,0 +1,2 @@
+[default.databases.rusty_db]
+url = "postgres://postgres:postgres@pgrusty:5432/rusty"
