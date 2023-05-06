@@ -26,8 +26,11 @@ struct User {
 }
 
 #[get("/find-user?<username>")]
-async fn find_user(db: &RustyDb, username: &str) -> Option<Json<User>> {
-    let maybe_user = sqlx::query_as!(
+async fn find_user(
+    db: &RustyDb,
+    username: &str,
+) -> Result<Option<Json<User>>, rocket::http::Status> {
+    let result = sqlx::query_as!(
         User,
         "SELECT id, username, first, last, age FROM public.user WHERE username = $1;",
         username
@@ -35,13 +38,13 @@ async fn find_user(db: &RustyDb, username: &str) -> Option<Json<User>> {
     .fetch_optional(&db.0)
     .await;
 
-    match maybe_user {
-        | Ok(Some(user)) => Some(Json(user)),
-        | Ok(None) => None,
-        | Err(err) => {
-            eprint!("{}", err);
-            None
-        },
+    match result {
+        Ok(Some(user)) => Ok(Some(Json(user))),
+        Ok(None) => Ok(None),
+        Err(err) => {
+            eprintln!("{}", err);
+            Err(rocket::http::Status { code: 500 })
+        }
     }
 }
 
@@ -76,7 +79,8 @@ fn goodbye() -> &'static str {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build()
-        .attach(RustyDb::init())
-        .mount("/", routes![index, goodbye, delay, typical_create, find_user])
+    rocket::build().attach(RustyDb::init()).mount(
+        "/",
+        routes![index, goodbye, delay, typical_create, find_user],
+    )
 }
