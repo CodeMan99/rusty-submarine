@@ -10,13 +10,14 @@ use rocket::serde::json::Json;
 use rocket::serde::Serialize;
 use rocket::tokio::time::{sleep, Duration};
 use rocket_db_pools::{sqlx, Database};
+use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Database)]
 #[database("rusty_db")]
 struct RustyDb(sqlx::PgPool);
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct User {
     id: i64,
     username: String,
@@ -46,6 +47,28 @@ async fn find_user(
             Err(rocket::http::Status { code: 500 })
         }
     }
+}
+
+#[post("/create-user", data = "<user>")]
+async fn create_user(
+    key: ApiKey,
+    db: &RustyDb,
+    user: Json<User>,
+) -> Option<&'static str> {
+    println!("      >> Request Accepted with Api-Key: {:?}", key);
+
+    let result = sqlx::query_as!(
+        User,
+        "INSERT INTO public.user(username, first, last, age) VALUES ($1, $2, $3, $4);",
+        user.username,
+        user.first,
+        user.last,
+        user.age,
+    )
+    .execute(&db.0)
+    .await;
+
+    result.ok().map(|_| "Success")
 }
 
 #[derive(Serialize)]
@@ -81,6 +104,6 @@ fn goodbye() -> &'static str {
 fn rocket() -> _ {
     rocket::build().attach(RustyDb::init()).mount(
         "/",
-        routes![index, goodbye, delay, typical_create, find_user],
+        routes![index, goodbye, delay, typical_create, find_user, create_user],
     )
 }
