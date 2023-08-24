@@ -53,21 +53,26 @@ async fn create_user(
     key: ApiKey,
     db: &RustyDb,
     user: Json<User>,
-) -> Option<&'static str> {
+) -> Result<Json<i64>, rocket::http::Status> {
     println!("      >> Request Accepted with Api-Key: {:?}", key);
 
-    let result = sqlx::query_as!(
-        User,
-        "INSERT INTO public.user(username, first, last, age) VALUES ($1, $2, $3, $4);",
+    let result = sqlx::query!(
+        "INSERT INTO public.user(username, first, last, age) VALUES ($1, $2, $3, $4) RETURNING id;",
         user.username,
         user.first,
         user.last,
         user.age,
     )
-    .execute(&db.0)
+    .fetch_one(&db.0)
     .await;
 
-    result.ok().map(|_| "Success")
+    match result {
+        Ok(record) => Ok(Json(record.id)),
+        Err(err) => {
+            eprintln!("{}", err);
+            Err(rocket::http::Status { code: 500 })
+        }
+    }
 }
 
 #[derive(Serialize)]

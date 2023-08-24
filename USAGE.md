@@ -59,7 +59,7 @@ curl "http://localhost:8000/find-user?username=codeman99"
 Route: `POST /create-user`
 Headers: `X-Api-Key: <uuid>`
 Body: `{"id":0,"username":"<username>","first":"<first>","last":"<last>","age":<age>}`
-Returns: _Text_ -> `Success`
+Returns: _JSON_ -> `<id>`
 
 ```bash
 curl -H "X-Api-Key: $(cat /proc/sys/kernel/random/uuid)" \
