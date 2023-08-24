@@ -43,7 +43,7 @@ async fn find_user(
         Ok(None) => Ok(None),
         Err(err) => {
             eprintln!("{}", err);
-            Err(rocket::http::Status { code: 500 })
+            Err(rocket::http::Status::new(500))
         }
     }
 }
@@ -70,7 +70,7 @@ async fn create_user(
         Ok(record) => Ok(Json(record.id)),
         Err(err) => {
             eprintln!("{}", err);
-            Err(rocket::http::Status { code: 500 })
+            Err(rocket::http::Status::new(500))
         }
     }
 }
