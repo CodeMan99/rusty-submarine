@@ -7,10 +7,9 @@ mod apikey;
 use apikey::ApiKey;
 use rocket::response::status::Accepted;
 use rocket::serde::json::Json;
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 use rocket::tokio::time::{sleep, Duration};
 use rocket_db_pools::{sqlx, Database};
-use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Database)]
